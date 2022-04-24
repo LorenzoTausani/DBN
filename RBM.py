@@ -10,7 +10,7 @@ import sys
 
 BATCH_SIZE = 64
 
-class RBM(nn.Module):
+class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     '''
     This class defines all the functions needed for an BinaryRBN model
     where the visible and hidden units are both considered binary
@@ -19,7 +19,7 @@ class RBM(nn.Module):
     def __init__(self,
                 visible_units=256,
                 hidden_units = 64,
-                k=2,
+                k=2, #k dovrebbe essere il numero di step di gibbs sampling
                 learning_rate=1e-5,
                 learning_rate_decay = False,
                 xavier_init = False,
@@ -32,6 +32,12 @@ class RBM(nn.Module):
         c:hidden unit bias shape (hidden_units , )
         b : visible unit bias shape(visisble_units ,)
         '''
+        #https://www.programiz.com/python-programming/methods/built-in/super
+        #https://www.youtube.com/watch?v=aBexJgZ6GjI
+        #super mi permette di chiamare l'init method dalla superclasse
+
+        #la scrittura super(RBM,self) sembra essere solo un residuo di python2
+        #https://stackoverflow.com/questions/576169/understanding-python-super-with-init-methods
         super(RBM,self).__init__()
         self.desc = "RBM"
 
@@ -49,6 +55,15 @@ class RBM(nn.Module):
         # Initialization
         if not self.xavier_init:
             self.W = torch.randn(self.visible_units,self.hidden_units) * 0.01 #weights
+            #https://pytorch.org/docs/stable/generated/torch.randn.html
+            #Returns a tensor filled with random numbers from a normal distribution with mean 0 and variance 1 
+            
+            '''
+            torch.randn(2, 3)
+            OUTPUT: tensor([[ 1.5954,  2.8929, -1.0923],
+                            [ 1.1719, -0.4709, -0.1996]])
+            '''
+
         else:
             self.xavier_value = torch.sqrt(torch.FloatTensor([1.0 / (self.visible_units + self.hidden_units)]))
             self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units) * (2 * self.xavier_value)
@@ -57,6 +72,9 @@ class RBM(nn.Module):
 
 
     def to_hidden(self ,X):
+
+       #molto facile come funzione
+
         '''
         Converts the data in visible layer to hidden layer
         also does sampling
@@ -66,7 +84,7 @@ class RBM(nn.Module):
                     sample_X_prob - Gibbs sampling of hidden (1 or 0) based
                                 on the value
         '''
-        X_prob = torch.matmul(X,self.W)
+        X_prob = torch.matmul(X,self.W) 
         X_prob = torch.add(X_prob, self.h_bias)#W.x + c
         X_prob  = torch.sigmoid(X_prob)
 
