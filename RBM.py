@@ -139,7 +139,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     def contrastive_divergence(self, input_data ,training = True,
                                 n_gibbs_sampling_steps=1,lr = 0.001):
         # positive phase
-
+        #qui sta l'errore
         positive_hidden_probabilities,positive_hidden_act  = self.to_hidden(input_data)
 
         # calculating W via positive side
@@ -223,7 +223,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                 desc="RBM fitting", file=sys.stdout):
 
                 batch = batch.view(len(batch) , self.visible_units)
-                
+                print(batch) #debug
                 if(self.use_gpu):
                     batch = batch.cuda()
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
