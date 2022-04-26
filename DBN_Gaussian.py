@@ -4,7 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from RBM import RBM
 from GaussianBernoulliRBM import GaussianBernoulliRBM
-
+from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 
 
@@ -32,14 +33,25 @@ class DBN(nn.Module):
                 input_size = visible_units
             else:
                 input_size = hidden_units[i-1]
-            rbm = GaussianBernoulliRBM(visible_units = input_size,
-                    hidden_units = hidden_units[i],
-                    k= k,
-                    learning_rate = learning_rate,
-                    learning_rate_decay = learning_rate_decay,
-                    xavier_init = xavier_init,
-                    increase_to_cd_k = increase_to_cd_k,
-                    use_gpu=use_gpu)
+
+            if i==0:
+                rbm = GaussianBernoulliRBM(visible_units = input_size,
+                        hidden_units = hidden_units[i],
+                        k= k,
+                        learning_rate = learning_rate,
+                        learning_rate_decay = learning_rate_decay,
+                        xavier_init = xavier_init,
+                        increase_to_cd_k = increase_to_cd_k,
+                        use_gpu=use_gpu)
+            else:
+                rbm = RBM(visible_units = input_size,
+                        hidden_units = hidden_units[i],
+                        k= k,
+                        learning_rate = learning_rate,
+                        learning_rate_decay = learning_rate_decay,
+                        xavier_init = xavier_init,
+                        increase_to_cd_k = increase_to_cd_k,
+                        use_gpu=use_gpu)
 
             self.rbm_layers.append(rbm)
 
@@ -87,7 +99,7 @@ class DBN(nn.Module):
         return p_v,v
 
 
-
+    #dbn_mnist.train_static(mnist_data.data ,mnist_data.train_labels,num_epochs , batch_size)
     def train_static(self, train_data,train_labels,num_epochs=50,batch_size=10):
         '''
         Greedy Layer By Layer training
@@ -100,17 +112,36 @@ class DBN(nn.Module):
             print("-"*20)
             print("Training the {} st rbm layer".format(i+1))
 
-            tensor_x = tmp.type(torch.FloatTensor) # transform to torch tensors
-            tensor_y = train_labels.type(torch.FloatTensor)
-            _dataset = torch.utils.data.TensorDataset(tensor_x,tensor_y) # create your datset
-            _dataloader = torch.utils.data.DataLoader(_dataset,batch_size=batch_size,drop_last = True) # create your dataloader
 
-            self.rbm_layers[i].train(_dataloader , num_epochs,batch_size)
-            # print(train_data.shape)
-            v = tmp.view((tmp.shape[0] , -1)).type(torch.FloatTensor)#flatten
-            p_v , v = self.rbm_layers[i].forward(v)
-            tmp = v
-            # print(v.shape)
+            if i ==0 :
+                # If we train on the whole set we expect it to learn to detect edges.
+                tensor_x = tmp.type(torch.FloatTensor) # transform to torch tensors
+                tensor_y = train_labels.type(torch.FloatTensor)
+                _dataset = torch.utils.data.TensorDataset(tensor_x,tensor_y) # create your datset
+                _dataloader = torch.utils.data.DataLoader(_dataset,
+                                    batch_size=batch_size, shuffle=True,drop_last = True)
+                                    
+                self.rbm_layers[i].train(_dataloader , num_epochs,batch_size)
+                # print(train_data.shape)
+                v = tmp.view((tmp.shape[0] , -1)).type(torch.FloatTensor)#flatten
+                p_v , v = self.rbm_layers[i].forward(v)
+                tmp = v
+                # print(v.shape)
+
+            else:
+                tensor_x = tmp.type(torch.FloatTensor) # transform to torch tensors
+                tensor_y = train_labels.type(torch.FloatTensor)
+                _dataset = torch.utils.data.TensorDataset(tensor_x,tensor_y) # create your datset
+                _dataloader = torch.utils.data.DataLoader(_dataset,batch_size=batch_size,drop_last = True) # create your dataloader
+                # l'unica differenza con il dataloader del tutorial con Gaussian RBM è il fatto che quella ha shuffle=True (di default l'
+                # opzione è false)
+
+                self.rbm_layers[i].train(_dataloader , num_epochs,batch_size)
+                # print(train_data.shape)
+                v = tmp.view((tmp.shape[0] , -1)).type(torch.FloatTensor)#flatten
+                p_v , v = self.rbm_layers[i].forward(v)
+                tmp = v
+                # print(v.shape)
         return
 
     def train_ith(self, train_data,train_labels,num_epochs,batch_size,ith_layer):
