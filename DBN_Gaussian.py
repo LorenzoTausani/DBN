@@ -38,7 +38,7 @@ class DBN(nn.Module):
                 rbm = GaussianBernoulliRBM(visible_units = input_size,
                         hidden_units = hidden_units[i],
                         k= k,
-                        learning_rate = learning_rate,
+                        learning_rate = learning_rate/10,
                         learning_rate_decay = learning_rate_decay,
                         xavier_init = xavier_init,
                         increase_to_cd_k = increase_to_cd_k,
@@ -120,7 +120,7 @@ class DBN(nn.Module):
                 _dataset = torch.utils.data.TensorDataset(tensor_x,tensor_y) # create your datset
                 _dataloader = torch.utils.data.DataLoader(_dataset,
                                     batch_size=batch_size, shuffle=True,drop_last = True)
-                                    
+
                 self.rbm_layers[i].train(_dataloader , num_epochs,batch_size)
                 # print(train_data.shape)
                 v = tmp.view((tmp.shape[0] , -1)).type(torch.FloatTensor)#flatten

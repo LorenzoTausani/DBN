@@ -223,7 +223,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                 desc="RBM fitting", file=sys.stdout):
 
                 batch = batch.view(len(batch) , self.visible_units)
-                print(batch) #debug
+                #print(batch) #debug
                 if(self.use_gpu):
                     batch = batch.cuda()
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
