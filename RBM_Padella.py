@@ -51,6 +51,7 @@ class RBM(nn.Module):
             self.W = torch.randn(self.visible_units,self.hidden_units) * 0.01 #weights
         else:
             self.xavier_value = torch.sqrt(torch.cuda.FloatTensor([1.0 / (self.visible_units + self.hidden_units)]))
+            print(self.xavier_value.is_cuda)
             self.W = -self.xavier_value + torch.cuda.FloatTensor(torch.rand(self.visible_units, self.hidden_units)) * (2 * self.xavier_value)
         self.h_bias = torch.zeros(self.hidden_units) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units) #visible layer bias
