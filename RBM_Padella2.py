@@ -9,7 +9,7 @@ from tqdm import tqdm
 import sys
 
 BATCH_SIZE = 64
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 
 
@@ -48,8 +48,9 @@ class RBM(nn.Module):
         self.use_gpu = use_gpu
         self.batch_size = 16
 
-
+         
         # Initialization
+        DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         if not self.xavier_init:
             self.W = torch.randn(self.visible_units,self.hidden_units) * 0.01 #weights
         else:
