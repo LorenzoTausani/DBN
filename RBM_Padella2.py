@@ -78,7 +78,7 @@ class RBM(nn.Module):
         '''
         X.cuda()
         self.W.cuda()
-        X = torch.flatten(X)
+        # X = torch.flatten(X)
         print('X shape is', X.shape)
         print('W shape is', self.W.shape)
         X_prob = torch.matmul(X,self.W)
