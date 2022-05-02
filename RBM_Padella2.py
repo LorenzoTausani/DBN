@@ -234,7 +234,7 @@ class RBM(nn.Module):
                                 desc="RBM fitting", file=sys.stdout):
 
                 batch = batch.view(len(batch) , self.visible_units)
-                
+                print (batch.shape)
                 if(self.use_gpu):
                     batch = batch.cuda()
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
