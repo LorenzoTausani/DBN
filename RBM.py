@@ -84,7 +84,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                     sample_X_prob - Gibbs sampling of hidden (1 or 0) based
                                 on the value
         '''
-        X_prob = torch.matmul(X,self.W.to('cuda')) 
+        X_prob = torch.matmul(X,self.W) 
         X_prob = torch.add(X_prob, self.h_bias)#W.x + c
         X_prob  = torch.sigmoid(X_prob)
 
