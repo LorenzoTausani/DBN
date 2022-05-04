@@ -254,4 +254,4 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                                             torch.mean(grad_),\
                                                             torch.std(grad_)))
 
-        return
+        return cost_
