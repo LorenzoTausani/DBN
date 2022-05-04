@@ -237,7 +237,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                 desc="RBM fitting", file=sys.stdout):
 
                 batch = batch.view(len(batch) , self.visible_units)
-                print(batch.shape) #debug
+                #print(batch.shape) #debug
                 batch = batch.to(self.Device)
                 '''
                 old code (prima di inserire batch = batch.to(self.Device))
