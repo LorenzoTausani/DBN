@@ -53,6 +53,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
 
         # Initialization
+        DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.Device = DEVICE
+
         if not self.xavier_init:
             self.W = torch.randn(self.visible_units,self.hidden_units) * 0.01 #weights
             #https://pytorch.org/docs/stable/generated/torch.randn.html
@@ -65,10 +68,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             '''
 
         else:
-            self.xavier_value = torch.sqrt(torch.FloatTensor([1.0 / (self.visible_units + self.hidden_units)]))
-            self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units) * (2 * self.xavier_value)
-        self.h_bias = torch.zeros(self.hidden_units) #hidden layer bias
-        self.v_bias = torch.zeros(self.visible_units) #visible layer bias
+            self.xavier_value = torch.sqrt(torch.FloatTensor([1.0 / (self.visible_units + self.hidden_units)])).to(DEVICE)
+            self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units).to(DEVICE) * (2 * self.xavier_value)
+        self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
+        self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
 
 
     def to_hidden(self ,X):
@@ -84,7 +87,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                     sample_X_prob - Gibbs sampling of hidden (1 or 0) based
                                 on the value
         '''
-        X_prob = torch.matmul(X,self.W) 
+        X.to(self.Device)
+        self.W.to(self.Device)
+
+        X_prob = torch.matmul(X,self.W)
         X_prob = torch.add(X_prob, self.h_bias)#W.x + c
         X_prob  = torch.sigmoid(X_prob)
 
@@ -101,6 +107,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                     sample_X_prob - sample of new layer(Gibbs Sampling)
 
         '''
+        X.to(self.Device)
+
         # computing hidden activations and then converting into probabilities
         X_prob = torch.matmul(X ,self.W.transpose( 0 , 1) )
         X_prob = torch.add(X_prob , self.v_bias)
@@ -130,6 +138,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         '''
         v = X
+        v = v.to(self.Device)
         for i in range(n_gibbs):
             prob_h_,h = self.to_hidden(v)
             prob_v_,v = self.to_visible(prob_h_)
@@ -139,6 +148,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     def contrastive_divergence(self, input_data ,training = True,
                                 n_gibbs_sampling_steps=1,lr = 0.001):
         # positive phase
+
+        input_data.to(self.Device)
+
         #qui sta l'errore
         positive_hidden_probabilities,positive_hidden_act  = self.to_hidden(input_data)
 
@@ -149,6 +161,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         # negetive phase
         hidden_activations = positive_hidden_act
+        hidden_activations.to(self.Device)
         for i in range(n_gibbs_sampling_steps):
             visible_probabilities , _ = self.to_visible(hidden_activations)
             hidden_probabilities,hidden_activations = self.to_hidden(visible_probabilities)
@@ -184,6 +197,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     def forward(self,input_data):
         'data->hidden'
         return  self.to_hidden(input_data)
+
     def step(self,input_data,epoch,num_epochs):
         '''
             Includes the foward prop plus the gradient descent
@@ -216,16 +230,21 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             n_batches = int(len(train_loader))
             # print(n_batches)
 
-            cost_ = torch.FloatTensor(n_batches , 1)
-            grad_ = torch.FloatTensor(n_batches , 1)
+            cost_ = torch.FloatTensor(n_batches , 1).to(self.Device)
+            grad_ = torch.FloatTensor(n_batches , 1).to(self.Device)
 
             for i,(batch,_) in tqdm(enumerate(train_loader),ascii=True,
                                 desc="RBM fitting", file=sys.stdout):
 
                 batch = batch.view(len(batch) , self.visible_units)
                 print(batch.shape) #debug
+                batch = batch.to(self.Device)
+                '''
+                old code (prima di inserire batch = batch.to(self.Device))
                 if(self.use_gpu):
-                    batch = batch.cuda()
+                    batch = batch.cuda()                
+                '''
+
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
 
 
