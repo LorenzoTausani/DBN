@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import math
 from tqdm import tqdm
 import sys
+import numpy as np
 
 BATCH_SIZE = 64
 
@@ -224,6 +225,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         else:
             train_loader = torch.utils.data.DataLoader(train_dataloader, batch_size=batch_size)
 
+        Avg_cost=np.zeros(num_epochs)
+        Std_cost=np.zeros(num_epochs)
 
         for epoch in range(1 , num_epochs+1):
             epoch_err = 0.0
@@ -248,10 +251,14 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
 
 
+            Avg_cost[epoch-1] = torch.mean(cost_).numpy()
+            Std_cost[epoch-1] = torch.std(cost_).numpy()
+
             print("Epoch:{} ,avg_cost = {} ,std_cost = {} ,avg_grad = {} ,std_grad = {}".format(epoch,\
                                                             torch.mean(cost_),\
                                                             torch.std(cost_),\
                                                             torch.mean(grad_),\
                                                             torch.std(grad_)))
 
-        return cost_
+
+        return Avg_cost, Std_cost
