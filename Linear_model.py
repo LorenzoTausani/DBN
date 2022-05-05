@@ -72,9 +72,9 @@ class Linear_classifier():
  
 
     # cross validation scheme
-    def cross_validate_classifier(self, num_of_folds=10):
+    def cross_validate_classifier(self, nf=10):
         # create stratified k folds of dataset for cross validation
-        skf = StratifiedKFold(n_splits=num_of_folds,shuffle=True,random_state=0)
+        skf = StratifiedKFold(n_splits=nf,shuffle=True,random_state=0)
         skf.get_n_splits(self.data, self.labels)
         # store predicted accuracies of each fold
         CV_pred_accuracies = []
