@@ -1,6 +1,6 @@
 # Linear model 
 import numpy as np
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 
 class Linear_classifier():
     def __init__(self,all_data, all_labels, classNr, lr=8e-1, reg=2e-3, nr_iters=100):
