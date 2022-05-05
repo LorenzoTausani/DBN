@@ -22,7 +22,7 @@ class Linear_classifier():
         for i in range(self.Nr_iterations):
 
             # evaluate class scores, [N x K]
-            scores = np.dot(self.Nr_features, self.W) + self.bias
+            scores = np.dot(self.Training_data, self.W) + self.bias
             #print("score values")
             #print(scores[:10])
             #print("length:",len(scores))
