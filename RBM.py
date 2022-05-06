@@ -8,6 +8,7 @@ import math
 from tqdm import tqdm
 import sys
 from Linear_model_tf import LinearClassifier
+import random
 
 BATCH_SIZE = 64
 
@@ -51,7 +52,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.increase_to_cd_k = increase_to_cd_k
         self.use_gpu = use_gpu
         self.batch_size = 16
-        self.h_labels = []
+        self.h_train_labels = []
+        self.h_test_labels = []
 
 
         # Initialization
@@ -136,7 +138,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         '''
         return self.contrastive_divergence(data, False)
 
-    def reconstruct(self , X,  n_gibbs, gather_h_data=False, etichetta=11):
+    def reconstruct(self , X,  n_gibbs, gather_h_data=False, etichetta=11, is_train_set=True):
         '''
         This will reconstruct the sample with k steps of gibbs Sampling
 
@@ -145,20 +147,50 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         v = v.to(self.Device)
         for i in range(n_gibbs):
             prob_h_,h = self.to_hidden(v)
-            if gather_h_data:
-                
-                self.h_labels.append(etichetta)
 
-                try:
-                    self.h_dataset = torch.cat((self.h_dataset, h), dim=0)
-                except:
-                    self.h_dataset = h
+            if gather_h_data:
+                if is_train_set:
+                    self.h_train_labels.append(etichetta)
+                    try:
+                        self.h_train_dataset = torch.cat((self.h_train_dataset, h), dim=0)
+                    except:
+                        self.h_train_dataset = h
+
+                else:
+                    self.h_test_labels.append(etichetta)
+                    try:
+                        self.h_test_dataset = torch.cat((self.h_test_dataset, h), dim=0)
+                    except:
+                        self.h_test_dataset = h
 
             prob_v_,v = self.to_visible(prob_h_)
 
         return prob_v_,v
 
-    
+    def create_h_tran_test_set(self, data, labels, nr_train_el=48000, nr_test_el=12000):
+        if nr_train_el>0:
+            for nr in range(nr_train_el):
+                idx = random.randint(0,len(data)-1)
+                img = data[idx]
+                lbl = labels[idx]
+                reconstructed_img = img.view(1,-1).type(torch.FloatTensor)
+
+                lbl = lbl.numpy()
+                lbl = int(lbl)
+
+                _,reconstructed_img= self.reconstruct(reconstructed_img, 1, True, lbl, is_train_set=True)
+
+        if nr_test_el>0:
+            for nr in range(nr_test_el):
+                idx = random.randint(0,len(data)-1)
+                img = data[idx]
+                lbl = labels[idx]
+                reconstructed_img = img.view(1,-1).type(torch.FloatTensor)
+
+                lbl = lbl.numpy()
+                lbl = int(lbl)
+
+                _,reconstructed_img= self.reconstruct(reconstructed_img, 1, True, lbl, is_train_set=False)
 
 
     def contrastive_divergence(self, input_data ,training = True,
