@@ -51,6 +51,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.increase_to_cd_k = increase_to_cd_k
         self.use_gpu = use_gpu
         self.batch_size = 16
+        self.h_labels = []
 
 
         # Initialization
@@ -135,7 +136,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         '''
         return self.contrastive_divergence(data, False)
 
-    def reconstruct(self , X,  n_gibbs, gather_h_data=False, etichetta=0):
+    def reconstruct(self , X,  n_gibbs, gather_h_data=False):
         '''
         This will reconstruct the sample with k steps of gibbs Sampling
 
@@ -152,7 +153,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                     self.h_dataset = h
 
             prob_v_,v = self.to_visible(prob_h_)
+
         return prob_v_,v
+
+    
 
 
     def contrastive_divergence(self, input_data ,training = True,
