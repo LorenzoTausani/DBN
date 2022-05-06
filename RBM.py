@@ -74,7 +74,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
         self.h_linear_classifier = LinearClassifier().to(DEVICE)
-        self.h_dataset =[]
+        
 
 
     def to_hidden(self ,X):
@@ -145,7 +145,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         for i in range(n_gibbs):
             prob_h_,h = self.to_hidden(v)
             if gather_h_data:
-                self.h_dataset = self.h_dataset.append(h)
+                try:
+                    self.h_dataset = torch.cat((self.h_dataset, h), dim=0)
+                except:
+                    self.h_dataset = h
 
             prob_v_,v = self.to_visible(prob_h_)
         return prob_v_,v
