@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import math
 from tqdm import tqdm
 import sys
+from Linear_model_tf import LinearClassifier
 
 BATCH_SIZE = 64
 
@@ -72,6 +73,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units).to(DEVICE) * (2 * self.xavier_value)
         self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
+        self.h_linear_classifier = LinearClassifier().to(DEVICE)
+        self.h_dataset =[]
 
 
     def to_hidden(self ,X):
@@ -132,7 +135,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         '''
         return self.contrastive_divergence(data, False)
 
-    def reconstruct(self , X,n_gibbs):
+    def reconstruct(self , X,n_gibbs, gather_h_data=False):
         '''
         This will reconstruct the sample with k steps of gibbs Sampling
 
@@ -141,6 +144,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         v = v.to(self.Device)
         for i in range(n_gibbs):
             prob_h_,h = self.to_hidden(v)
+            if gather_h_data:
+                self.h_dataset = self.h_dataset.append(h)
+
             prob_v_,v = self.to_visible(prob_h_)
         return prob_v_,v
 
