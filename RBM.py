@@ -135,7 +135,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         '''
         return self.contrastive_divergence(data, False)
 
-    def reconstruct(self , X,  n_gibbs, gather_h_data=False, etichetta=torch.tensor(1)):
+    def reconstruct(self , X,  n_gibbs, gather_h_data=False, etichetta=0):
         '''
         This will reconstruct the sample with k steps of gibbs Sampling
 
@@ -147,10 +147,11 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             if gather_h_data:
                 try:
                     self.h_dataset = torch.cat((self.h_dataset, h), dim=0)
-                    self.h_labels = torch.cat((self.h_labels, etichetta.type(torch.LongTensor)), dim=0)
+                    self.h_labels = self.h_labels.append(etichetta)
+
                 except:
                     self.h_dataset = h
-                    self.h_labels = etichetta.type(torch.LongTensor)
+                    self.h_labels = [etichetta]
 
             prob_v_,v = self.to_visible(prob_h_)
         return prob_v_,v
