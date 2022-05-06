@@ -1,3 +1,5 @@
+import torch
+
 class LinearClassifier(torch.nn.Module):
   def __init__(self, input_dim=28*28, output_dim=10):
     super(LinearClassifier, self).__init__()
