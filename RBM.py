@@ -9,6 +9,7 @@ from tqdm import tqdm
 import sys
 from Linear_model_tf import LinearClassifier
 import random
+import numpy as np
 
 BATCH_SIZE = 64
 
@@ -77,8 +78,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
         self.h_linear_classifier = LinearClassifier().to(DEVICE)
-        
-
+        self.criterion = nn.CrossEntropyLoss().to(DEVICE)
 
     def to_hidden(self ,X):
 
@@ -193,6 +193,65 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 _,reconstructed_img= self.reconstruct(reconstructed_img, 1, True, lbl, is_train_set=False)
 
 
+    def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01):
+        tensor_X_train = self.h_train_dataset.type(torch.FloatTensor).to(self.DEVICE) # transform to torch tensors
+        y_train = torch.from_numpy(np.array(self.h_train_labels))
+        tensor_y_train = y_train.type(torch.LongTensor).to(self.DEVICE)
+
+        train_dataset = torch.utils.data.TensorDataset(tensor_X_train, tensor_y_train) # create your datset
+    
+        train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=50,shuffle=True) # create your dataloader
+
+        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr)
+
+        all_loss = []
+
+        for epoch in range(nr_epochs):
+
+            temp_loss = []
+
+            for images, labels in train_dataloader:
+                output = self.h_linear_classifier(images.view(images.shape[0], -1))
+
+                loss = self.criterion(output, labels)
+                loss.backward()
+
+                temp_loss.append(loss.item())
+
+                optimizer.step()
+                optimizer.zero_grad()
+            
+            all_loss.append(np.mean(temp_loss))
+            print(f"Epoch: {epoch}, loss: {np.mean(temp_loss)}")
+        
+        return all_loss
+            
+
+    def test_h_Linear_classifier(self):
+        tensor_X_test = self.h_test_dataset.type(torch.FloatTensor).to(self.DEVICE) # transform to torch tensors
+        y_test = torch.from_numpy(np.array(self.h_test_labels))
+        tensor_y_test = y_test.type(torch.LongTensor).to(self.DEVICE)
+
+        test_dataset = torch.utils.data.TensorDataset(tensor_X_test, tensor_y_test) # create your datset
+
+        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=50,shuffle=True) # create your dataloader
+
+        correct, total = 0, 0
+
+        with torch.no_grad():
+
+            for images, labels in test_dataloader:
+                output = self.h_linear_classifier(images.view(images.shape[0], -1))
+
+                _, predicted = torch.max(output.data, 1)
+
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        return (100 * correct / total)
+
+
+    
     def contrastive_divergence(self, input_data ,training = True,
                                 n_gibbs_sampling_steps=1,lr = 0.001):
         # positive phase
