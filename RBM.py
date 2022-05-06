@@ -77,7 +77,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units).to(DEVICE) * (2 * self.xavier_value)
         self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
-        self.h_linear_classifier = LinearClassifier().to(DEVICE)
+        self.h_linear_classifier = LinearClassifier(input_dim=self.hidden_units, output_dim=10).to(DEVICE)
         self.criterion = nn.CrossEntropyLoss().to(DEVICE)
 
     def to_hidden(self ,X):
