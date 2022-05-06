@@ -147,11 +147,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             if gather_h_data:
                 try:
                     self.h_dataset = torch.cat((self.h_dataset, h), dim=0)
-                    self.h_labels = self.h_labels.append(etichetta)
 
                 except:
                     self.h_dataset = h
-                    self.h_labels = [etichetta]
 
             prob_v_,v = self.to_visible(prob_h_)
         return prob_v_,v
