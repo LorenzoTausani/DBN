@@ -194,9 +194,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
 
     def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01):
-        tensor_X_train = self.h_train_dataset.type(torch.FloatTensor).to(self.DEVICE) # transform to torch tensors
+        tensor_X_train = self.h_train_dataset.type(torch.FloatTensor).to(self.Device) # transform to torch tensors
         y_train = torch.from_numpy(np.array(self.h_train_labels))
-        tensor_y_train = y_train.type(torch.LongTensor).to(self.DEVICE)
+        tensor_y_train = y_train.type(torch.LongTensor).to(self.Device)
 
         train_dataset = torch.utils.data.TensorDataset(tensor_X_train, tensor_y_train) # create your datset
     
@@ -228,9 +228,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             
 
     def test_h_Linear_classifier(self):
-        tensor_X_test = self.h_test_dataset.type(torch.FloatTensor).to(self.DEVICE) # transform to torch tensors
+        tensor_X_test = self.h_test_dataset.type(torch.FloatTensor).to(self.Device) # transform to torch tensors
         y_test = torch.from_numpy(np.array(self.h_test_labels))
-        tensor_y_test = y_test.type(torch.LongTensor).to(self.DEVICE)
+        tensor_y_test = y_test.type(torch.LongTensor).to(self.Device)
 
         test_dataset = torch.utils.data.TensorDataset(tensor_X_test, tensor_y_test) # create your datset
 
