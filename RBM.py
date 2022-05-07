@@ -168,6 +168,19 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             prob_v_,v = self.to_visible(prob_h_)
 
         return prob_v_,v
+        
+
+    def reset_h_tran_test_set(self,train=False, test=True):
+        if train:
+            self.h_train_labels = []
+            delattr(self, 'h_train_dataset' )
+        
+
+        if test:
+            self.h_test_labels = []
+            delattr(self, 'h_test_dataset')
+
+
 
     def create_h_tran_test_set(self, data, labels, nr_train_el=48000, nr_test_el=12000, nr_gibbs=1):
         if nr_train_el>0:
@@ -206,7 +219,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr)
 
-        all_loss = []
+        all_loss = [] #pensa di farla diventare attributo
 
         for epoch in range(nr_epochs):
 
