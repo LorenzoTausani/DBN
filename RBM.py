@@ -170,6 +170,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         return prob_v_,v
 
     def h_from_label(self, label=5, multiplier = 10):
+
+        #si vede qualcosa, ma non funziona super bene
         
         lbl_vec = torch.zeros(10).to(self.Device)
         lbl_vec[label]=1*multiplier
