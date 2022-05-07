@@ -148,26 +148,28 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         for i in range(n_gibbs):
             prob_h_,h = self.to_hidden(v)
 
-            if gather_h_data:
-                if is_train_set:
-                    self.h_train_labels.append(etichetta)
-                    try:
-                        self.h_train_dataset = torch.cat((self.h_train_dataset, h), dim=0)
-                    except:
-                        self.h_train_dataset = h
+            if i==n_gibbs-1:
 
-                else:
-                    self.h_test_labels.append(etichetta)
-                    try:
-                        self.h_test_dataset = torch.cat((self.h_test_dataset, h), dim=0)
-                    except:
-                        self.h_test_dataset = h
+                if gather_h_data:
+                    if is_train_set:
+                        self.h_train_labels.append(etichetta)
+                        try:
+                            self.h_train_dataset = torch.cat((self.h_train_dataset, h), dim=0)
+                        except:
+                            self.h_train_dataset = h
+
+                    else:
+                        self.h_test_labels.append(etichetta)
+                        try:
+                            self.h_test_dataset = torch.cat((self.h_test_dataset, h), dim=0)
+                        except:
+                            self.h_test_dataset = h
 
             prob_v_,v = self.to_visible(prob_h_)
 
         return prob_v_,v
 
-    def create_h_tran_test_set(self, data, labels, nr_train_el=48000, nr_test_el=12000):
+    def create_h_tran_test_set(self, data, labels, nr_train_el=48000, nr_test_el=12000, nr_gibbs=1):
         if nr_train_el>0:
             for nr in range(nr_train_el):
                 idx = random.randint(0,len(data)-1)
@@ -178,7 +180,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 lbl = lbl.numpy()
                 lbl = int(lbl)
 
-                _,reconstructed_img= self.reconstruct(reconstructed_img, 1, True, lbl, is_train_set=True)
+                _,reconstructed_img= self.reconstruct(reconstructed_img, nr_gibbs, True, lbl, is_train_set=True)
 
         if nr_test_el>0:
             for nr in range(nr_test_el):
@@ -190,7 +192,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 lbl = lbl.numpy()
                 lbl = int(lbl)
 
-                _,reconstructed_img= self.reconstruct(reconstructed_img, 1, True, lbl, is_train_set=False)
+                _,reconstructed_img= self.reconstruct(reconstructed_img, nr_gibbs, True, lbl, is_train_set=False)
 
 
     def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01):
