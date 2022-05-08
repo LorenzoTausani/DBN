@@ -411,8 +411,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return Avg_cost, Std_cost
 
-    def save_model(self,object, filename):
+    def save_model(self, filename):
         #lavora con drive
+
+        object = self
 
         filename = '/content/gdrive/My Drive/' + filename+ '.pkl'
 
@@ -421,19 +423,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         with open(filename, 'wb') as outp:  # Overwrites any existing file.
             pickle.dump(object, outp, pickle.HIGHEST_PROTOCOL)
-            
 
-    def load_model(self,filename):
-
-        filename = '/content/gdrive/My Drive/' + filename+ '.pkl'
-
-        from google.colab import drive
-        drive.mount('/content/gdrive')
-
-        with open(filename, 'rb') as inp:
-            model = pickle.load(inp)
-
-        return model
 
 
 
