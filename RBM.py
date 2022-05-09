@@ -56,6 +56,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.batch_size = 16
         self.h_train_labels = []
         self.h_test_labels = []
+        self.nr_train_epochs_done = 0
+        self.nr_train_epochs_done_CLASSIFIER = 0
+
 
 
         # Initialization
@@ -235,6 +238,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
 
     def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01):
+
+        self.nr_train_epochs_done_CLASSIFIER = self.nr_train_epochs_done_CLASSIFIER + nr_epochs
+
         tensor_X_train = self.h_train_dataset.type(torch.FloatTensor).to(self.Device) # transform to torch tensors
         y_train = torch.from_numpy(np.array(self.h_train_labels))
         tensor_y_train = y_train.type(torch.LongTensor).to(self.Device)
@@ -365,6 +371,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
 
     def train(self,train_dataloader , num_epochs = 50,batch_size=16):
+
+        self.nr_train_epochs_done = self.nr_train_epochs_done+ num_epochs
 
         self.batch_size = batch_size
         if(isinstance(train_dataloader ,torch.utils.data.DataLoader)):
