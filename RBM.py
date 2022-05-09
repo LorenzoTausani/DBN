@@ -434,8 +434,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         plt.ylabel('reconstruction error (MSE)')
         plt.title('RBM - training curve')
 
-        ymin = self.RBM_train_loss - np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data) #SEM
-        ymax = self.RBM_train_loss + np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data)
+        ymin = np.array(self.RBM_train_loss[0]) - np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data) #SEM
+        ymax = np.array(self.RBM_train_loss[0]) + np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data)
 
         x=list(range(0,len(self.RBM_train_loss)))
 
