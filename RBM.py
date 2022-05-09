@@ -419,8 +419,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                                             torch.mean(grad_),\
                                                             torch.std(grad_)))
 
-        self.RBM_train_loss.append(Avg_cost.numpy().tolist())
-        self.RBM_train_loss_std.append(Std_cost.numpy().tolist())
+        self.RBM_train_loss.append(Avg_cost.cpu().numpy().tolist())
+        self.RBM_train_loss_std.append(Std_cost.cpu().numpy().tolist())
 
 
         return Avg_cost, Std_cost
