@@ -58,6 +58,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.h_test_labels = []
         self.nr_train_epochs_done = 0
         self.nr_train_epochs_done_CLASSIFIER = 0
+        self.RBM_train_loss=[]
+        self.RBM_train_loss_std=[]
+        self.CLASSIFIER_train_loss=[]
 
 
 
@@ -251,7 +254,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr)
 
-        all_loss = [] #pensa di farla diventare attributo
+        #all_loss = [] #pensa di farla diventare attributo
 
         for epoch in range(nr_epochs):
 
@@ -268,10 +271,10 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 optimizer.step()
                 optimizer.zero_grad()
             
-            all_loss.append(np.mean(temp_loss))
+            self.CLASSIFIER_train_loss.append(np.mean(temp_loss))
             print(f"Epoch: {epoch}, loss: {np.mean(temp_loss)}")
         
-        return all_loss
+        return self.CLASSIFIER_train_loss
             
 
     def test_h_Linear_classifier(self):
@@ -415,6 +418,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                                             torch.std(cost_),\
                                                             torch.mean(grad_),\
                                                             torch.std(grad_)))
+
+        self.RBM_train_loss.append(Avg_cost.numpy().tolist())
+        self.RBM_train_loss_std.append(Std_cost.numpy().tolist())
 
 
         return Avg_cost, Std_cost
