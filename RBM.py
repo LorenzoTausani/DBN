@@ -419,8 +419,21 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return Avg_cost, Std_cost
 
-    def save_model(self, filename):
+    def save_model(self, nr_gibbs_htrain=1, nr_gibbs_htest=1):
         #lavora con drive
+
+        try:
+            h_train_size = self.h_train_dataset.shape[0]
+        except:
+            h_train_size = 0
+
+        try:
+            h_test_size = self.h_test_dataset.shape[0]
+        except:
+            h_test_size = 0
+
+
+        filename = 'rbm_train'+ str(self.nr_train_epochs_done)+'_classifier_train'+str(self.nr_train_epochs_done_CLASSIFIER)+'_generated_h_train'+str(h_train_size)+'gibbs'+str(nr_gibbs_htrain)+'_generated_h_test'+str(h_test_size)+'gibbs'+str(nr_gibbs_htest)
 
         object = self
 
