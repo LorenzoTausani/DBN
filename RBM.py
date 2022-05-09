@@ -433,13 +433,17 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         plt.xlabel('epoch')
         plt.ylabel('reconstruction error (MSE)')
         plt.title('RBM - training curve')
-
+        '''
+        ERROR BARS NON FUNZIONANTI - DA mettere a posto quando hai tempo
         ymin = np.array(self.RBM_train_loss[0]) - np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data) #SEM
         ymax = np.array(self.RBM_train_loss[0]) + np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data)
 
         x=list(range(0,len(self.RBM_train_loss)))
 
         plt.fill_between(x, ymax, ymin)
+
+        '''
+
 
         plt.show() 
 
