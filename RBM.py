@@ -11,6 +11,7 @@ from Linear_model_tf import LinearClassifier
 import random
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 
 BATCH_SIZE = 64
 
@@ -273,6 +274,12 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             
             self.CLASSIFIER_train_loss.append(np.mean(temp_loss))
             print(f"Epoch: {epoch}, loss: {np.mean(temp_loss)}")
+
+        plt.plot(self.CLASSIFIER_train_loss , '-', lw=2)
+        plt.xlabel('epoch')
+        plt.ylabel('cross entropy loss')
+        plt.title('Linear classifier on h data - training curve')
+        plt.show() 
         
         return self.CLASSIFIER_train_loss
             
@@ -373,7 +380,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         return self.contrastive_divergence(input_data , True,n_gibbs_sampling_steps,lr);
 
 
-    def train(self,train_dataloader , num_epochs = 50,batch_size=16):
+    def train(self,train_dataloader , num_epochs = 50,batch_size=16, nr_data=60000):
 
         self.nr_train_epochs_done = self.nr_train_epochs_done+ num_epochs
 
@@ -421,6 +428,23 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         self.RBM_train_loss.append(Avg_cost.cpu().numpy().tolist())
         self.RBM_train_loss_std.append(Std_cost.cpu().numpy().tolist())
+
+        plt.plot(self.RBM_train_loss[0], '-', lw=2)
+        plt.xlabel('epoch')
+        plt.ylabel('reconstruction error (MSE)')
+        plt.title('RBM - training curve')
+
+        ymin = self.RBM_train_loss - np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data) #SEM
+        ymax = self.RBM_train_loss + np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data)
+
+        x=list(range(0,len(self.RBM_train_loss)))
+
+        plt.fill_between(x, ymax, ymin)
+
+        plt.show() 
+
+
+
 
 
         return Avg_cost, Std_cost
