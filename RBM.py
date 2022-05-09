@@ -426,8 +426,14 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                                                             torch.mean(grad_),\
                                                             torch.std(grad_)))
 
-        self.RBM_train_loss.append(Avg_cost.cpu().numpy().tolist())
-        self.RBM_train_loss_std.append(Std_cost.cpu().numpy().tolist())
+        
+        if len(self.RBM_train_loss)>0:
+            self.RBM_train_loss[0] = self.RBM_train_loss[0] + Avg_cost.cpu().numpy().tolist()
+            self.RBM_train_loss_std[0] = self.RBM_train_loss_std[0] + Std_cost.cpu().numpy().tolist()
+
+        else:
+            self.RBM_train_loss.append(Avg_cost.cpu().numpy().tolist())
+            self.RBM_train_loss_std.append(Std_cost.cpu().numpy().tolist())
 
         plt.plot(self.RBM_train_loss[0], '-', lw=2)
         plt.xlabel('epoch')
