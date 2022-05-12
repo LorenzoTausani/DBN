@@ -253,7 +253,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     
         train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=50,shuffle=True) # create your dataloader
 
-        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr)
+        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr, weight_decay=0.01)
 
         #all_loss = [] #pensa di farla diventare attributo
 
