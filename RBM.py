@@ -162,16 +162,16 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                     if is_train_set:
                         self.h_train_labels.append(etichetta)
                         try:
-                            self.h_train_dataset = torch.cat((self.h_train_dataset, h), dim=0)
+                            self.h_train_dataset = torch.cat((self.h_train_dataset, prob_h_), dim=0)
                         except:
-                            self.h_train_dataset = h
+                            self.h_train_dataset = prob_h_
 
                     else:
                         self.h_test_labels.append(etichetta)
                         try:
-                            self.h_test_dataset = torch.cat((self.h_test_dataset, h), dim=0)
+                            self.h_test_dataset = torch.cat((self.h_test_dataset, prob_h_), dim=0)
                         except:
-                            self.h_test_dataset = h
+                            self.h_test_dataset = prob_h_
 
             prob_v_,v = self.to_visible(prob_h_)
 
