@@ -177,27 +177,22 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return prob_v_,v
 
-    def h_from_label(self, label=5, multiplier = 10):
+    def h_from_label(self, label=5, multiplier = 1):
 
         #si vede qualcosa, ma non funziona super bene
         
         lbl_vec = torch.zeros(10).to(self.Device)
         lbl_vec[label]=1*multiplier
+        lbl_vec = lbl_vec.cpu().numpy()
 
-        #fake_minus_bias = torch.subtract(lbl_vec,self.h_linear_classifier.state_dict()['linear.bias'])
-        W_inv = torch.linalg.pinv(self.h_linear_classifier.state_dict()['linear.weight'].T) #Moore-Penrose pseudoinverse weight matrix
-        biased_h =torch.matmul(lbl_vec,W_inv)
+        biased_h =torch.matmul(self.W_inv,lbl_vec)
 
-        '''
-        SE VUOI VEDERE IL VISIBLE CHE PRODUCE (non qui, esegui su colab):
-
-        v, sample_v = rbm_mnist.to_visible(h)
+        v, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
 
         reconstructed_img = sample_v.view((28,28)).cpu()
 
         plt.imshow(reconstructed_img , cmap = 'gray')
-        
-        '''
+
         return biased_h
 
 
@@ -241,49 +236,28 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 _,reconstructed_img= self.reconstruct(reconstructed_img, nr_gibbs, True, lbl, is_train_set=False)
 
 
-    def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01, l2_param=0.1):
+    def train_h_Linear_classifier(self, nr_cat=10):
 
-        self.nr_train_epochs_done_CLASSIFIER = self.nr_train_epochs_done_CLASSIFIER + nr_epochs
+        #From Modeling language and cognition with deep unsupervised learning: a tutorial overview (Zorzi et al, 2013)
 
-        tensor_X_train = self.h_train_dataset.type(torch.FloatTensor).to(self.Device) # transform to torch tensors
-        y_train = torch.from_numpy(np.array(self.h_train_labels))
-        tensor_y_train = y_train.type(torch.LongTensor).to(self.Device)
+        P = self.h_train_dataset.T
+        P_plus = torch.linalg.pinv(P).cpu().numpy()
 
-        train_dataset = torch.utils.data.TensorDataset(tensor_X_train, tensor_y_train) # create your datset
+        L = torch.zeros(nr_cat,len(self.h_train_dataset))
+        c=0
+        for lbl in self.h_train_labels:
+            L[lbl,c]=1
+            c=c+1
     
-        train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=50,shuffle=True) # create your dataloader
+        L_plus = torch.linalg.pinv(L).cpu().numpy()
 
-        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr, weight_decay=l2_param)
+        W = np.dot(L,P_plus)
+        W_inv = np.dot(P.cpu().numpy(),L_plus)
 
-        #all_loss = [] #pensa di farla diventare attributo
-
-        for epoch in range(nr_epochs):
-
-            temp_loss = []
-
-            for images, labels in train_dataloader:
-                output = self.h_linear_classifier(images.view(images.shape[0], -1))
-
-                loss = self.criterion(output, labels)
-                loss.backward()
-
-                temp_loss.append(loss.item())
-
-                optimizer.step()
-                optimizer.zero_grad()
-            
-            self.CLASSIFIER_train_loss.append(np.mean(temp_loss))
-            print(f"Epoch: {epoch}, loss: {np.mean(temp_loss)}")
-
-        plt.plot(self.CLASSIFIER_train_loss , '-', lw=2)
-        plt.xlabel('epoch')
-        plt.ylabel('cross entropy loss')
-        plt.title('Linear classifier on h data - training curve')
-        plt.show() 
+        self.h_linear_classifier.state_dict()['linear.weight'] = torch.from_numpy(W)
+        self.W_inv = W_inv
         
-        return self.CLASSIFIER_train_loss
             
-
     def test_h_Linear_classifier(self):
         tensor_X_test = self.h_test_dataset.type(torch.FloatTensor).to(self.Device) # transform to torch tensors
         y_test = torch.from_numpy(np.array(self.h_test_labels))
