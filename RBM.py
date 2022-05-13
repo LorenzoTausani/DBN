@@ -7,11 +7,11 @@ import torch.nn.functional as F
 import math
 from tqdm import tqdm
 import sys
-from Linear_model_tf import LinearClassifier
 import random
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
+from Linear_model_tf import LinearClassifier
 
 BATCH_SIZE = 64
 
@@ -254,7 +254,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         W = np.dot(L,P_plus)
         W_inv = np.dot(P.cpu().numpy(),L_plus)
 
-        self.h_linear_classifier.state_dict()['linear.weight'] = torch.from_numpy(W)
+        with torch.no_grad():
+            self.h_linear_classifier.linear.weight.copy_(torch.from_numpy(W))
+
         self.W_inv = W_inv
         
             
