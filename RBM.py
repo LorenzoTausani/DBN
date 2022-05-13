@@ -184,9 +184,9 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         lbl_vec = torch.zeros(10).to(self.Device)
         lbl_vec[label]=1*multiplier
 
-        fake_minus_bias = torch.subtract(lbl_vec,self.h_linear_classifier.state_dict()['linear.bias'])
+        #fake_minus_bias = torch.subtract(lbl_vec,self.h_linear_classifier.state_dict()['linear.bias'])
         W_inv = torch.linalg.pinv(self.h_linear_classifier.state_dict()['linear.weight'].T) #Moore-Penrose pseudoinverse weight matrix
-        biased_h =torch.matmul(fake_minus_bias,W_inv)
+        biased_h =torch.matmul(lbl_vec,W_inv)
 
         '''
         SE VUOI VEDERE IL VISIBLE CHE PRODUCE (non qui, esegui su colab):
