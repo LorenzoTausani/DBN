@@ -241,7 +241,6 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 _,reconstructed_img= self.reconstruct(reconstructed_img, nr_gibbs, True, lbl, is_train_set=False)
 
 
-    def train_h_Linear_classifier(self, nr_epochs=100, Lr=0.01):
 
         self.nr_train_epochs_done_CLASSIFIER = self.nr_train_epochs_done_CLASSIFIER + nr_epochs
 
@@ -253,7 +252,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
     
         train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=50,shuffle=True) # create your dataloader
 
-        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr, weight_decay=0.01)
+        optimizer = torch.optim.SGD(self.h_linear_classifier.parameters(), lr=Lr, weight_decay=l2_param)
 
         #all_loss = [] #pensa di farla diventare attributo
 
