@@ -185,7 +185,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         lbl_vec[label]=1*multiplier
         lbl_vec = lbl_vec.cpu().numpy()
 
-        biased_h =torch.matmul(self.W_inv,lbl_vec)
+        biased_h =np.dot(self.W_inv,lbl_vec)
 
         v, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
 
