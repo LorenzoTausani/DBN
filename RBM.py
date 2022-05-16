@@ -208,6 +208,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         if test:
             self.h_test_labels = []
             delattr(self, 'h_test_dataset')
+            delattr(self, 'nr_gibbs_test')
 
 
 
