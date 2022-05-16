@@ -12,6 +12,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from Linear_model_tf import LinearClassifier
+import os
 
 BATCH_SIZE = 64
 
@@ -456,10 +457,19 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
             object = self
 
-            filename = '/content/gdrive/My Drive/' + filename+ '.pkl'
+            
 
             from google.colab import drive
             drive.mount('/content/gdrive')
+
+            save_path = "/content/gdrive/My Drive/"+filename
+
+            try:
+                os.mkdir(save_path)
+            except:
+                print("Folder already found")
+
+            filename = save_path +'/'+ filename + '.pkl'
 
             with open(filename, 'wb') as outp:  # Overwrites any existing file.
                 pickle.dump(object, outp, pickle.HIGHEST_PROTOCOL)
