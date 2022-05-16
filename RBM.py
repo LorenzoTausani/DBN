@@ -449,7 +449,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             h_test_size = 0
 
 
-        filename = 'rbm_train'+ str(self.nr_train_epochs_done)+'_classifier_train'+str(self.nr_train_epochs_done_CLASSIFIER)+'_generated_h_train'+str(h_train_size)+'gibbs'+str(nr_gibbs_htrain)+'_generated_h_test'+str(h_test_size)+'gibbs'+str(nr_gibbs_htest)
+        filename = 'rbm_train'+ str(self.nr_train_epochs_done)+'_generated_h_train'+str(h_train_size)+'gibbs'+str(nr_gibbs_htrain)+'_generated_h_test'+str(h_test_size)+'gibbs'+str(nr_gibbs_htest)
         
 
         if just_filename==0:
