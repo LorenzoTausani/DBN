@@ -235,6 +235,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 lbl = int(lbl)
 
                 _,reconstructed_img= self.reconstruct(reconstructed_img, nr_gibbs, True, lbl, is_train_set=False)
+                self.nr_gibbs_test = nr_gibbs
 
 
     def train_h_Linear_classifier(self, nr_cat=10):
