@@ -458,16 +458,16 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         from google.colab import drive
         drive.mount('/content/gdrive')
 
-        save_path = "/content/gdrive/My Drive/"+filename
+        save_path = "/content/gdrive/My Drive/"+self.filename
 
         try:
             os.mkdir(save_path)
         except:
             print("Folder already found")
 
-        filename = save_path +'/'+ filename + '.pkl'
+        Filename = save_path +'/'+ self.filename + '.pkl'
 
-        with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        with open(Filename, 'wb') as outp:  # Overwrites any existing file.
             pickle.dump(object, outp, pickle.HIGHEST_PROTOCOL)
         
         
