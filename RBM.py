@@ -196,46 +196,47 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return biased_h
 
-    def reconstruct_from_h(self,lbl,nr_steps = 50, nr_print=5):
+    def reconstruct_from_h(self,nr_classes = 10 ,nr_steps = 50, nr_print=5):
 
-        figure, axis = plt.subplots(1, nr_print+1, figsize=(3*(nr_print+1),3))
-
+        figure, axis = plt.subplots(nr_classes, nr_print+1, figsize=(3*(nr_print+1),2.5*(nr_classes)))
 
         print_idx = list(range(round(nr_steps/nr_print)-1,nr_steps,round(nr_steps/nr_print)))
 
-        biased_h = self.h_from_label(label=lbl, multiplier = 1)
+        for lbl in range(nr_classes):
 
-        prob_v_, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
+            biased_h = self.h_from_label(label=lbl, multiplier = 1)
 
-        reconstructed_img = sample_v.view((28,28)).cpu()
+            prob_v_, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
 
-        axis[0].imshow(reconstructed_img, cmap = 'gray')
-        axis[0].set_title(str(lbl)+" after {} reconstructions".format(1))
+            reconstructed_img = sample_v.view((28,28)).cpu()
 
-        axis[0].set_xticklabels([])
-        axis[0].set_yticklabels([])
-        axis[0].set_aspect('equal')
+            axis[lbl,0].imshow(reconstructed_img, cmap = 'gray')
+            axis[lbl,0].set_title(str(lbl)+" after {} reconstructions".format(1))
+
+            axis[lbl,0].set_xticklabels([])
+            axis[lbl,0].set_yticklabels([])
+            axis[lbl,0].set_aspect('equal')
 
 
 
-        counter = 1
-        
-        for i in range(nr_steps):
+            counter = 1
+            
+            for i in range(nr_steps):
 
-            prob_h_,h = self.to_hidden(sample_v)
+                prob_h_,h = self.to_hidden(sample_v)
 
-            prob_v_,sample_v = self.to_visible(prob_h_)
+                prob_v_,sample_v = self.to_visible(prob_h_)
 
-            if (i in print_idx):
-                reconstructed_img = sample_v.view((28,28)).cpu()
+                if (i in print_idx):
+                    reconstructed_img = sample_v.view((28,28)).cpu()
 
-                axis[counter].imshow(reconstructed_img, cmap = 'gray')
-                axis[counter].set_title(str(lbl)+" after {} reconstructions".format(i+1))
+                    axis[lbl,counter].imshow(reconstructed_img, cmap = 'gray')
+                    axis[lbl,counter].set_title(str(lbl)+" after {} reconstructions".format(i+1))
 
-                axis[counter].set_xticklabels([])
-                axis[counter].set_yticklabels([])
-                axis[counter].set_aspect('equal')
-                counter +=1
+                    axis[lbl,counter].set_xticklabels([])
+                    axis[lbl,counter].set_yticklabels([])
+                    axis[lbl,counter].set_aspect('equal')
+                    counter +=1
         
         return figure, axis
 
