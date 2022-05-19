@@ -196,7 +196,32 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return biased_h
 
+    def reconstruct_from_h(self,lbl,nr_steps = 50, nr_print=5):
 
+        figure, axis = plt.subplots(1, nr_print, figsize=(2.5*nr_print,3))
+
+
+        print_idx = list(range(round(nr_steps/nr_print)-1,nr_steps,round(nr_steps/nr_print)))
+
+        biased_h = self.h_from_label(label=lbl, multiplier = 1)
+
+        v, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
+        
+        for i in range(nr_steps):
+            prob_h_,h = self.to_hidden(v)
+            prob_v_,v = self.to_visible(prob_h_)
+
+            if (i in print_idx):
+                reconstructed_img = sample_v.view((28,28)).cpu()
+
+                axis[lbl].imshow(reconstructed_img, cmap = 'gray')
+                axis[lbl].set_title(str(lbl)+" after {} reconstructions".format(i+1))
+
+                axis[lbl].set_xticklabels([])
+                axis[lbl].set_yticklabels([])
+                axis[lbl].set_aspect('equal')
+        
+        return figure, axis
 
 
     def reset_h_tran_test_set(self,train=False, test=True):
