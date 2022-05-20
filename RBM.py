@@ -30,8 +30,8 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 learning_rate_decay = False,
                 xavier_init = False,
                 increase_to_cd_k = False,
-                Num_classes = 10
-                ):
+                Num_classes = 10,
+                grandezza_batch = 50):
         '''
         Defines the model
         W:Wheights shape (visible_units,hidden_units)
@@ -54,7 +54,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.learning_rate_decay = learning_rate_decay
         self.xavier_init = xavier_init
         self.increase_to_cd_k = increase_to_cd_k
-        self.batch_size = 16
+        self.batch_size = grandezza_batch
         self.h_train_labels = []
         self.h_test_labels = []
         self.nr_train_epochs_done = 0
@@ -312,7 +312,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         test_dataset = torch.utils.data.TensorDataset(tensor_X_test, tensor_y_test) # create your datset
 
-        test_dataloader = torch.utils.data.DataLoader(test_dataset,batch_size=50,shuffle=True) # create your dataloader
+        test_dataloader = torch.utils.data.DataLoader(test_dataset,self.batch_size,shuffle=True) # create your dataloader
 
         correct, total = 0, 0
 
@@ -401,16 +401,14 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         return self.contrastive_divergence(input_data , True,n_gibbs_sampling_steps,lr);
 
 
-    def train(self,train_dataloader , num_epochs = 50,batch_size=16):
+    def train(self,train_dataloader , num_epochs = 50):
 
         self.nr_train_epochs_done = self.nr_train_epochs_done+ num_epochs
-
-        self.batch_size = batch_size
         
         if(isinstance(train_dataloader ,torch.utils.data.DataLoader)):
             train_loader = train_dataloader
         else:
-            train_loader = torch.utils.data.DataLoader(train_dataloader, batch_size=batch_size)
+            train_loader = torch.utils.data.DataLoader(train_dataloader, batch_size=self.batch_size)
 
 
         Avg_cost = torch.FloatTensor(num_epochs , 1).to(self.Device)
