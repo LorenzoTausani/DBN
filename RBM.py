@@ -30,7 +30,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 learning_rate_decay = False,
                 xavier_init = False,
                 increase_to_cd_k = False,
-                use_gpu = False
+                Num_classes = 10
                 ):
         '''
         Defines the model
@@ -54,7 +54,6 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.learning_rate_decay = learning_rate_decay
         self.xavier_init = xavier_init
         self.increase_to_cd_k = increase_to_cd_k
-        self.use_gpu = use_gpu
         self.batch_size = 16
         self.h_train_labels = []
         self.h_test_labels = []
@@ -63,6 +62,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         self.RBM_train_loss=[]
         self.RBM_train_loss_std=[]
         self.CLASSIFIER_train_loss=[]
+        self.Num_classes = Num_classes
 
 
 
@@ -86,7 +86,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
             self.W = -self.xavier_value + torch.rand(self.visible_units, self.hidden_units).to(DEVICE) * (2 * self.xavier_value)
         self.h_bias = torch.zeros(self.hidden_units).to(DEVICE) #hidden layer bias
         self.v_bias = torch.zeros(self.visible_units).to(DEVICE) #visible layer bias
-        self.h_linear_classifier = LinearClassifier(input_dim=self.hidden_units, output_dim=10).to(DEVICE)
+        self.h_linear_classifier = LinearClassifier(input_dim=self.hidden_units, output_dim=self.Num_classes).to(DEVICE)
         self.criterion = nn.CrossEntropyLoss().to(DEVICE)
 
     def to_hidden(self ,X):
@@ -182,7 +182,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         #si vede qualcosa, ma non funziona super bene
         
-        lbl_vec = torch.zeros(10).to(self.Device)
+        lbl_vec = torch.zeros(self.Num_classes).to(self.Device)
         lbl_vec[label]=1*multiplier
         lbl_vec = lbl_vec.cpu().numpy()
 
@@ -196,13 +196,13 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return biased_h
 
-    def reconstruct_from_h(self,nr_classes = 10 ,nr_steps = 50, nr_print=5):
+    def reconstruct_from_h(self ,nr_steps = 50, nr_print=5):
 
-        figure, axis = plt.subplots(nr_classes, nr_print+1, figsize=(3*(nr_print+1),2.5*(nr_classes)))
+        figure, axis = plt.subplots(self.Num_classes, nr_print+1, figsize=(3*(nr_print+1),2.5*(self.Num_classes)))
 
         print_idx = list(range(round(nr_steps/nr_print)-1,nr_steps,round(nr_steps/nr_print)))
 
-        for lbl in range(nr_classes):
+        for lbl in range(self.Num_classes):
 
             biased_h = self.h_from_label(label=lbl, multiplier = 1)
 
@@ -281,14 +281,14 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 self.nr_gibbs_test = nr_gibbs
 
 
-    def train_h_Linear_classifier(self, nr_cat=10):
+    def train_h_Linear_classifier(self):
 
         #From Modeling language and cognition with deep unsupervised learning: a tutorial overview (Zorzi et al, 2013)
 
         P = self.h_train_dataset.T
         P_plus = torch.linalg.pinv(P).cpu().numpy()
 
-        L = torch.zeros(nr_cat,len(self.h_train_dataset))
+        L = torch.zeros(self.Num_classes,len(self.h_train_dataset))
         c=0
         for lbl in self.h_train_labels:
             L[lbl,c]=1
@@ -401,11 +401,12 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         return self.contrastive_divergence(input_data , True,n_gibbs_sampling_steps,lr);
 
 
-    def train(self,train_dataloader , num_epochs = 50,batch_size=16, nr_data=60000):
+    def train(self,train_dataloader , num_epochs = 50,batch_size=16):
 
         self.nr_train_epochs_done = self.nr_train_epochs_done+ num_epochs
 
         self.batch_size = batch_size
+        
         if(isinstance(train_dataloader ,torch.utils.data.DataLoader)):
             train_loader = train_dataloader
         else:
@@ -429,11 +430,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
                 batch = batch.view(len(batch) , self.visible_units)
                 #print(batch.shape) #debug
                 batch = batch.to(self.Device)
-                '''
-                old code (prima di inserire batch = batch.to(self.Device))
-                if(self.use_gpu):
-                    batch = batch.cuda()                
-                '''
+
 
                 cost_[i-1],grad_[i-1] = self.step(batch,epoch,num_epochs)
 
@@ -460,16 +457,7 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         plt.xlabel('epoch')
         plt.ylabel('reconstruction error (MSE)')
         plt.title('RBM - training curve')
-        '''
-        ERROR BARS NON FUNZIONANTI - DA mettere a posto quando hai tempo
-        ymin = np.array(self.RBM_train_loss[0]) - np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data) #SEM
-        ymax = np.array(self.RBM_train_loss[0]) + np.array(self.RBM_train_loss_std[0])/np.sqrt(nr_data)
 
-        x=list(range(0,len(self.RBM_train_loss)))
-
-        plt.fill_between(x, ymax, ymin)
-
-        '''
 
 
         plt.show() 
