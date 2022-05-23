@@ -178,13 +178,28 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return prob_v_,v
 
-    def h_from_label(self, label=5, multiplier = 1):
+    def h_from_label(self, label=5, multiplier = 1, gen_mode = 'from_label'):
 
         #si vede qualcosa, ma non funziona super bene
+
+        if gen_mode == 'from_label':
         
-        lbl_vec = torch.zeros(self.Num_classes).to(self.Device)
-        lbl_vec[label]=1*multiplier
-        lbl_vec = lbl_vec.cpu().numpy()
+            lbl_vec = torch.zeros(self.Num_classes).to(self.Device)
+            lbl_vec[label]=1*multiplier
+            lbl_vec = lbl_vec.cpu().numpy()
+
+        else:
+            i = int(input('random vector, average vector or other? (0=random, 1=average, 2=other)'))
+            if i == 0:
+                lbl_vec = np.random.rand(self.Num_classes)
+            elif i==1:
+                lbl_vec = np.ones(self.Num_classes)*(1/self.Num_classes)
+            else:
+                i2 = input('scrivi lista che vuoi inputtare (separa i numeri con uno spazio)')
+                lbl_vec = list(i2.split(" "))
+                lbl_vec = [float(item) for item in lbl_vec]
+                lbl_vec = np.array(lbl_vec)
+
 
         biased_h =np.dot(self.W_inv,lbl_vec)
 
@@ -196,47 +211,92 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
 
         return biased_h
 
-    def reconstruct_from_h(self ,nr_steps = 50, nr_print=5):
+    def reconstruct_from_h(self ,nr_steps = 50, nr_print=5, generation_mode = 'from_label'):
 
-        figure, axis = plt.subplots(self.Num_classes, nr_print+1, figsize=(3*(nr_print+1),2.5*(self.Num_classes)))
 
         print_idx = list(range(round(nr_steps/nr_print)-1,nr_steps,round(nr_steps/nr_print)))
 
-        for lbl in range(self.Num_classes):
+        if generation_mode == 'from_label':
 
-            biased_h = self.h_from_label(label=lbl, multiplier = 1)
+            figure, axis = plt.subplots(self.Num_classes, nr_print+1, figsize=(3*(nr_print+1),2.5*(self.Num_classes)))
 
-            prob_v_, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
+            for lbl in range(self.Num_classes):
 
-            reconstructed_img = sample_v.view((28,28)).cpu()
+                biased_h = self.h_from_label(label=lbl, multiplier = 1, gen_mode = generation_mode)
 
-            axis[lbl,0].imshow(reconstructed_img, cmap = 'gray')
-            axis[lbl,0].set_title(str(lbl)+" after {} reconstructions".format(1))
+                prob_v_, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
 
-            axis[lbl,0].set_xticklabels([])
-            axis[lbl,0].set_yticklabels([])
-            axis[lbl,0].set_aspect('equal')
+                reconstructed_img = sample_v.view((28,28)).cpu()
+
+                axis[lbl,0].imshow(reconstructed_img, cmap = 'gray')
+                axis[lbl,0].set_title(str(lbl)+" after {} reconstructions".format(1))
+
+                axis[lbl,0].set_xticklabels([])
+                axis[lbl,0].set_yticklabels([])
+                axis[lbl,0].set_aspect('equal')
 
 
 
-            counter = 1
+                counter = 1
+                
+                for i in range(nr_steps):
+
+                    prob_h_,h = self.to_hidden(sample_v)
+
+                    prob_v_,sample_v = self.to_visible(prob_h_)
+
+                    if (i in print_idx):
+                        reconstructed_img = sample_v.view((28,28)).cpu()
+
+                        axis[lbl,counter].imshow(reconstructed_img, cmap = 'gray')
+                        axis[lbl,counter].set_title(str(lbl)+" after {} reconstructions".format(i+1))
+
+                        axis[lbl,counter].set_xticklabels([])
+                        axis[lbl,counter].set_yticklabels([])
+                        axis[lbl,counter].set_aspect('equal')
+                        counter +=1
+
+        else:
+            nr_gens = int(input('quante generazioni vuoi fare?'))
+            figure, axis = plt.subplots(nr_gens, nr_print+1, figsize=(3*(nr_print+1),2.5*(nr_gens)))
+
             
-            for i in range(nr_steps):
+            for lbl in range(nr_gens):
 
-                prob_h_,h = self.to_hidden(sample_v)
+                biased_h = self.h_from_label(label=lbl, multiplier = 1, gen_mode = generation_mode)
 
-                prob_v_,sample_v = self.to_visible(prob_h_)
+                prob_v_, sample_v = self.to_visible(torch.from_numpy(biased_h).to(self.Device))
 
-                if (i in print_idx):
-                    reconstructed_img = sample_v.view((28,28)).cpu()
+                reconstructed_img = sample_v.view((28,28)).cpu()
 
-                    axis[lbl,counter].imshow(reconstructed_img, cmap = 'gray')
-                    axis[lbl,counter].set_title(str(lbl)+" after {} reconstructions".format(i+1))
+                axis[lbl,0].imshow(reconstructed_img, cmap = 'gray')
+                axis[lbl,0].set_title(" after {} reconstructions".format(1))
 
-                    axis[lbl,counter].set_xticklabels([])
-                    axis[lbl,counter].set_yticklabels([])
-                    axis[lbl,counter].set_aspect('equal')
-                    counter +=1
+                axis[lbl,0].set_xticklabels([])
+                axis[lbl,0].set_yticklabels([])
+                axis[lbl,0].set_aspect('equal')
+
+
+                counter = 1
+                
+                for i in range(nr_steps):
+
+                    prob_h_,h = self.to_hidden(sample_v)
+
+                    prob_v_,sample_v = self.to_visible(prob_h_)
+
+                    if (i in print_idx):
+                        reconstructed_img = sample_v.view((28,28)).cpu()
+
+                        axis[lbl,counter].imshow(reconstructed_img, cmap = 'gray')
+                        axis[lbl,counter].set_title(" after {} reconstructions".format(i+1))
+
+                        axis[lbl,counter].set_xticklabels([])
+                        axis[lbl,counter].set_yticklabels([])
+                        axis[lbl,counter].set_aspect('equal')
+                        counter +=1
+
+
         
         return figure, axis
 
