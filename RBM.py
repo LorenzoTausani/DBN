@@ -191,14 +191,16 @@ class RBM(nn.Module): #nn.Module: Base class for all neural network modules.
         else:
             i = int(input('random vector, average vector or other? (0=random, 1=average, 2=other)'))
             if i == 0:
-                lbl_vec = np.random.rand(self.Num_classes)
+                lbl_vec = torch.rand(self.Num_classes).to(self.Device)
+                lbl_vec = lbl_vec.cpu().numpy()
             elif i==1:
-                lbl_vec = np.ones(self.Num_classes)*(1/self.Num_classes)
+                lbl_vec = torch.ones(self.Num_classes).to(self.Device)*(1/self.Num_classes)
+                lbl_vec = lbl_vec.cpu().numpy()
             else:
                 i2 = input('scrivi lista che vuoi inputtare (separa i numeri con uno spazio)')
                 lbl_vec = list(i2.split(" "))
                 lbl_vec = [float(item) for item in lbl_vec]
-                lbl_vec = np.array(lbl_vec)
+                lbl_vec = np.array(lbl_vec, dtype="float32")
 
 
         biased_h =np.dot(self.W_inv,lbl_vec)
